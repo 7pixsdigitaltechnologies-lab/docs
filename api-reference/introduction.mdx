@@ -1,33 +1,28 @@
 ---
-title: 'Introduction'
-description: 'Example section for showcasing API endpoints'
+title: API reference overview
+description: Base URL, discovery endpoint, and how to use the OpenAPI-powered reference.
 ---
 
+## Base URL
+
+All Developer API paths are relative to your deployment **plus** the prefix `/api/v1/api`.
+
+**Example** — if your app URL is `https://chat.wapilot.com`, full URLs look like:
+
+`https://chat.wapilot.com/api/v1/api/contacts`
+
 <Note>
-  If you're not looking to build API reference documentation, you can delete
-  this section by removing the api-reference folder.
+  The interactive API playground in this site uses a placeholder **Server** in the OpenAPI spec (`https://your-domain.com/api/v1/api`). Replace it with your real host when trying requests, or set your own server in your HTTP client.
 </Note>
 
-## Welcome
+## Unauthenticated route
 
-There are two ways to build API documentation: [OpenAPI](https://mintlify.com/docs/api-playground/openapi/setup) and [MDX components](https://mintlify.com/docs/api-playground/mdx/configuration). For the starter kit, we are using the following OpenAPI specification.
+- **`GET /guide`** — Returns machine-readable `apirequests` with sample code (curl, Node, etc.). **No API key** required. Use it to discover examples against your own host.
 
-<Card
-  title="Plant Store Endpoints"
-  icon="leaf"
-  href="https://github.com/mintlify/starter/blob/main/api-reference/openapi.json"
->
-  View the OpenAPI specification file
-</Card>
+## Authenticated routes
 
-## Authentication
+All other operations require a valid **organization API key** in the `Authorization` header. See [Authentication](/developer-api/authentication).
 
-All API endpoints are authenticated using Bearer tokens and picked up from the specification file.
+## OpenAPI
 
-```json
-"security": [
-  {
-    "bearerAuth": []
-  }
-]
-```
+This site is generated from the OpenAPI 3.1 specification bundled in the docs repo. Endpoints, methods, and body schemas are listed in the **API reference** tab.

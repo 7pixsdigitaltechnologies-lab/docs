@@ -1,0 +1,50 @@
+---
+title: Response format
+description: Standard JSON envelope for Wapilot Developer API success and error responses.
+---
+
+## Envelope
+
+Successful and error responses use a consistent **JSON** shape (see `ApiResponse` in the backend):
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `status` | number | HTTP status code (also reflected in the response status) |
+| `success` | boolean | `true` for success, `false` for errors |
+| `message` | string | Human-readable summary |
+| `data` | object \| null | Payload on success; often `null` on error |
+| `errors` | array | Validation or detailed errors; often `[]` when unused |
+
+## Success example
+
+```json
+{
+  "status": 200,
+  "success": true,
+  "message": "Contacts retrieved successfully",
+  "data": { "rows": [], "meta": {} },
+  "errors": []
+}
+```
+
+The exact `data` object depends on the endpoint (list results, a single record, a send receipt, etc.).
+
+## Error example
+
+```json
+{
+  "status": 400,
+  "success": false,
+  "message": "The phone number is not valid.",
+  "data": null,
+  "errors": []
+}
+```
+
+## BigInt and JSON
+
+The server serializes **BigInt** values in JSON responses so numeric IDs from the database are safe for clients. If you see large integers, treat them as numbers or strings according to your client’s needs.
+
+## Related
+
+- [Authentication](/developer-api/authentication) — 401/403 response messages for API key and plan issues

@@ -1,0 +1,858 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Wapilot Developer API",
+    "description": "Organization-scoped HTTP API for WhatsApp messaging, contacts, templates, labels, and related resources. Authenticate with an **organization API key** (Bearer), not a user JWT.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://your-domain.com/api/v1/api",
+      "description": "Replace `your-domain.com` with your Wapilot backend host (e.g. production URL or `http://localhost:8000` for local dev)."
+    }
+  ],
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "tags": [
+    { "name": "Guide", "description": "Unauthenticated API discovery" },
+    { "name": "Verify", "description": "API key check" },
+    { "name": "Messaging", "description": "Send WhatsApp messages (stricter per-org send rate limit)" },
+    { "name": "Contacts", "description": "Contacts and contact–label operations" },
+    { "name": "Contact groups", "description": "Audiences (contact groups)" },
+    { "name": "Basic replies", "description": "Canned / auto-replies" },
+    { "name": "Templates", "description": "WhatsApp template listing and payload for sends" },
+    { "name": "Chats", "description": "Chat list" },
+    { "name": "Labels", "description": "Contact tags (labels)" }
+  ],
+  "paths": {
+    "/guide": {
+      "get": {
+        "tags": ["Guide"],
+        "summary": "Get API guide",
+        "description": "Returns machine-readable `apirequests` sections with sample requests (curl, Node, etc.). **No authentication required.** CORS is permissive for this path prefix; org origin allowlist may apply in other cases.",
+        "operationId": "getGuide",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApiSuccess_Guide" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/verify": {
+      "get": {
+        "tags": ["Verify"],
+        "summary": "Verify API key",
+        "description": "Confirms the Bearer API key is valid, the organization subscription is active, and the plan allows API access.",
+        "operationId": "verifyApiKey",
+        "responses": {
+          "200": {
+            "description": "Key valid",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApiSuccess_Verify" }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" }
+        }
+      }
+    },
+    "/send": {
+      "post": {
+        "tags": ["Messaging"],
+        "summary": "Send a text or interactive button message",
+        "description": "Sends a free-form or interactive (buttons) message. Subject to per-org **send** rate limit, active subscription, open messaging window, and contact subscription rules.",
+        "operationId": "sendMessage",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/SendMessageBody" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Message sent", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ApiSuccess_Object" } } } },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "429": { "$ref": "#/components/responses/TooManyRequests" }
+        }
+      }
+    },
+    "/send/template": {
+      "post": {
+        "tags": ["Messaging"],
+        "summary": "Send a template message",
+        "description": "Sends a WhatsApp template. Use `GET /templates/{uuid}/payload` to build the `template` object.",
+        "operationId": "sendTemplateMessage",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/SendTemplateBody" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Success or Meta error in body", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ApiSuccess_Object" } } } },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "429": { "$ref": "#/components/responses/TooManyRequests" }
+        }
+      }
+    },
+    "/send/media": {
+      "post": {
+        "tags": ["Messaging"],
+        "summary": "Send a media message",
+        "description": "Sends image/video/audio/document by URL. Requires an open 24h messaging window (same as free-form send).",
+        "operationId": "sendMediaMessage",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/SendMediaBody" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Media sent", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ApiSuccess_Object" } } } },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "429": { "$ref": "#/components/responses/TooManyRequests" }
+        }
+      }
+    },
+    "/contacts": {
+      "get": {
+        "tags": ["Contacts"],
+        "summary": "List contacts",
+        "operationId": "listContacts",
+        "parameters": [
+          { "name": "page", "in": "query", "schema": { "type": "integer", "minimum": 1, "default": 1 } },
+          { "name": "per_page", "in": "query", "schema": { "type": "integer", "minimum": 1, "maximum": 100, "default": 10 } }
+        ],
+        "responses": {
+          "200": { "description": "Paginated contacts", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ApiSuccess_Object" } } } },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      },
+      "post": {
+        "tags": ["Contacts"],
+        "summary": "Create contact",
+        "description": "May require an active plan and is subject to **contacts** subscription limits (`contacts_limit`) when configured.",
+        "operationId": "createContact",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/ContactCreateBody" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Created", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ApiSuccess_IdMessage" } } } },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" }
+        }
+      }
+    },
+    "/contacts/bulk": {
+      "post": {
+        "tags": ["Contacts"],
+        "summary": "Import contacts in bulk",
+        "description": "1–1000 contacts per request. Subject to `contacts_limit` when configured.",
+        "operationId": "bulkCreateContacts",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/BulkContactsBody" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Import result", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ApiSuccess_Object" } } } },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" }
+        }
+      }
+    },
+    "/contacts/{uuid}/labels": {
+      "get": {
+        "tags": ["Contacts"],
+        "summary": "List labels on a contact",
+        "operationId": "getContactLabels",
+        "parameters": [
+          { "name": "uuid", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "Labels for contact", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ApiSuccess_Object" } } } },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/contacts/labels/assign": {
+      "post": {
+        "tags": ["Contacts"],
+        "summary": "Assign labels to contacts",
+        "operationId": "assignLabelsToContacts",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/AssignLabelsBody" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Success", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ApiSuccess_Object" } } } },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/contacts/labels/unassign": {
+      "post": {
+        "tags": ["Contacts"],
+        "summary": "Remove labels from contacts",
+        "operationId": "unassignLabelsFromContacts",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/AssignLabelsBody" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Success", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ApiSuccess_Object" } } } },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/contacts/{uuid}": {
+      "put": {
+        "tags": ["Contacts"],
+        "summary": "Update contact",
+        "operationId": "updateContact",
+        "parameters": [
+          { "name": "uuid", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/ContactCreateBody" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Updated", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ApiSuccess_IdMessage" } } } },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      },
+      "delete": {
+        "tags": ["Contacts"],
+        "summary": "Delete contact",
+        "operationId": "deleteContact",
+        "parameters": [
+          { "name": "uuid", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "Deleted", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ApiSuccess_IdMessage" } } } },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/contact-groups": {
+      "get": {
+        "tags": ["Contact groups"],
+        "summary": "List contact groups",
+        "operationId": "listContactGroups",
+        "parameters": [
+          { "name": "page", "in": "query", "schema": { "type": "integer", "minimum": 1, "default": 1 } },
+          { "name": "per_page", "in": "query", "schema": { "type": "integer", "minimum": 1, "maximum": 100, "default": 10 } }
+        ],
+        "responses": {
+          "200": { "description": "Paginated groups", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ApiSuccess_Object" } } } },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      },
+      "post": {
+        "tags": ["Contact groups"],
+        "summary": "Create contact group",
+        "operationId": "createContactGroup",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/ContactGroupNameBody" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Created", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ApiSuccess_IdMessage" } } } },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" }
+        }
+      }
+    },
+    "/contact-groups/{uuid}": {
+      "put": {
+        "tags": ["Contact groups"],
+        "summary": "Update contact group",
+        "operationId": "updateContactGroup",
+        "parameters": [
+          { "name": "uuid", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/ContactGroupNameBody" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Updated", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ApiSuccess_IdMessage" } } } },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      },
+      "delete": {
+        "tags": ["Contact groups"],
+        "summary": "Delete contact group",
+        "operationId": "deleteContactGroup",
+        "parameters": [
+          { "name": "uuid", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Deleted", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ApiSuccess_IdMessage" } } } },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/basic-replies": {
+      "get": {
+        "tags": ["Basic replies"],
+        "summary": "List basic replies (canned replies)",
+        "operationId": "listBasicReplies",
+        "parameters": [
+          { "name": "page", "in": "query", "schema": { "type": "integer", "minimum": 1, "default": 1 } },
+          { "name": "per_page", "in": "query", "schema": { "type": "integer", "minimum": 1, "maximum": 100, "default": 10 } }
+        ],
+        "responses": {
+          "200": { "description": "Paginated replies", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ApiSuccess_Object" } } } },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      },
+      "post": {
+        "tags": ["Basic replies"],
+        "summary": "Create basic reply",
+        "operationId": "createBasicReply",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/BasicReplyBody" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Created", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ApiSuccess_IdMessage" } } } },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" }
+        }
+      }
+    },
+    "/basic-replies/{uuid}": {
+      "put": {
+        "tags": ["Basic replies"],
+        "summary": "Update basic reply",
+        "operationId": "updateBasicReply",
+        "parameters": [
+          { "name": "uuid", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/BasicReplyBody" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Updated", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ApiSuccess_IdMessage" } } } },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      },
+      "delete": {
+        "tags": ["Basic replies"],
+        "summary": "Delete basic reply",
+        "operationId": "deleteBasicReply",
+        "parameters": [
+          { "name": "uuid", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Deleted", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ApiSuccess_IdMessage" } } } },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/templates": {
+      "get": {
+        "tags": ["Templates"],
+        "summary": "List WhatsApp templates",
+        "operationId": "listTemplates",
+        "parameters": [
+          { "name": "page", "in": "query", "schema": { "type": "integer", "minimum": 1, "default": 1 } },
+          { "name": "per_page", "in": "query", "schema": { "type": "integer", "minimum": 1, "maximum": 100, "default": 10 } }
+        ],
+        "responses": {
+          "200": { "description": "Paginated templates", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ApiSuccess_Object" } } } },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/templates/{uuid}/payload": {
+      "get": {
+        "tags": ["Templates"],
+        "summary": "Get template payload for sending",
+        "description": "Returns components and hints for `POST /send/template` for this template.",
+        "operationId": "getTemplatePayload",
+        "parameters": [
+          { "name": "uuid", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "Template structure", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ApiSuccess_Object" } } } },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/chats": {
+      "get": {
+        "tags": ["Chats"],
+        "summary": "List chats",
+        "description": "Same filters as the dashboard chat list. Supports offset pagination or cursor when enabled.",
+        "operationId": "listChats",
+        "parameters": [
+          { "name": "search", "in": "query", "schema": { "type": "string" } },
+          { "name": "status", "in": "query", "description": "open | pending | resolved | closed", "schema": { "type": "string", "enum": ["open", "pending", "resolved", "closed"] } },
+          { "name": "assigned_to", "in": "query", "description": "User id string or 'unassigned'", "schema": { "type": "string" } },
+          { "name": "group_uuid", "in": "query", "description": "Comma-separated UUIDs for groups", "schema": { "type": "string" } },
+          { "name": "tag_uuid", "in": "query", "description": "Comma-separated label UUIDs", "schema": { "type": "string" } },
+          { "name": "favorite", "in": "query", "schema": { "type": "boolean" } },
+          { "name": "unread", "in": "query", "schema": { "type": "boolean" } },
+          { "name": "date_from", "in": "query", "schema": { "type": "string" } },
+          { "name": "date_to", "in": "query", "schema": { "type": "string" } },
+          { "name": "sort_by", "in": "query", "schema": { "type": "string", "enum": ["created_at", "updated_at", "last_message_at"] } },
+          { "name": "sort_order", "in": "query", "schema": { "type": "string", "enum": ["asc", "desc"] } },
+          { "name": "pagination", "in": "query", "description": "Enable page/per_page mode", "schema": { "type": "boolean", "default": false } },
+          { "name": "page", "in": "query", "schema": { "type": "integer", "minimum": 1 } },
+          { "name": "per_page", "in": "query", "schema": { "type": "integer", "minimum": 1, "maximum": 100 } },
+          { "name": "cursor", "in": "query", "schema": { "type": "string" } },
+          { "name": "limit", "in": "query", "schema": { "type": "integer", "minimum": 1, "maximum": 100 } }
+        ],
+        "responses": {
+          "200": { "description": "Chat list result", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ApiSuccess_Object" } } } },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/labels": {
+      "get": {
+        "tags": ["Labels"],
+        "summary": "List labels",
+        "operationId": "listLabels",
+        "responses": {
+          "200": { "description": "All labels for org", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ApiSuccess_Object" } } } },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      },
+      "post": {
+        "tags": ["Labels"],
+        "summary": "Create label",
+        "description": "May be subject to plan **label** limits (`label_limit`) when configured.",
+        "operationId": "createLabel",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/LabelCreateBody" }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Created", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ApiSuccess_Object" } } } },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" }
+        }
+      }
+    },
+    "/labels/bulk-delete": {
+      "post": {
+        "tags": ["Labels"],
+        "summary": "Delete multiple labels",
+        "operationId": "bulkDeleteLabels",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/LabelBulkDeleteBody" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Result", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ApiSuccess_Object" } } } },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/labels/{uuid}": {
+      "get": {
+        "tags": ["Labels"],
+        "summary": "Get label by UUID",
+        "operationId": "getLabel",
+        "parameters": [
+          { "name": "uuid", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "Label", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ApiSuccess_Object" } } } },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      },
+      "put": {
+        "tags": ["Labels"],
+        "summary": "Update label",
+        "operationId": "updateLabel",
+        "parameters": [
+          { "name": "uuid", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/LabelUpdateBody" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Updated", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ApiSuccess_Object" } } } },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      },
+      "delete": {
+        "tags": ["Labels"],
+        "summary": "Delete label",
+        "operationId": "deleteLabel",
+        "parameters": [
+          { "name": "uuid", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "Deleted", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ApiSuccess_Object" } } } },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "Organization API key",
+        "description": "API key from Developer Tools. Use `Authorization: Bearer <api_key>`. **Do not** send a user JWT; it will be rejected with 401."
+      }
+    },
+    "responses": {
+      "BadRequest": {
+        "description": "Invalid input or business rule (HTTP 400)",
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ApiErrorEnvelope" } } }
+      },
+      "Unauthorized": {
+        "description": "Missing/invalid key or wrong auth type (HTTP 401)",
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ApiErrorEnvelope" } } }
+      },
+      "Forbidden": {
+        "description": "Subscription inactive, API access disabled, or plan limit (HTTP 403)",
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ApiErrorEnvelope" } } }
+      },
+      "TooManyRequests": {
+        "description": "Per-organization rate limit (HTTP 429)",
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ApiErrorEnvelope" } } }
+      }
+    },
+    "schemas": {
+      "ApiErrorEnvelope": {
+        "type": "object",
+        "required": ["status", "success", "message", "data", "errors"],
+        "properties": {
+          "status": { "type": "integer" },
+          "success": { "const": false },
+          "message": { "type": "string" },
+          "data": { "type": "null" },
+          "errors": {
+            "type": "array",
+            "items": { "type": "object" }
+          }
+        }
+      },
+      "ApiSuccessBase": {
+        "type": "object",
+        "required": ["status", "success", "message", "data", "errors"],
+        "properties": {
+          "status": { "type": "integer" },
+          "success": { "const": true },
+          "message": { "type": "string" },
+          "data": { "description": "Response payload" },
+          "errors": { "type": "array", "items": { "type": "object" } }
+        }
+      },
+      "ApiSuccess_Object": {
+        "allOf": [
+          { "$ref": "#/components/schemas/ApiSuccessBase" },
+          {
+            "type": "object",
+            "properties": {
+              "data": { "type": "object", "additionalProperties": true }
+            }
+          }
+        ]
+      },
+      "ApiSuccess_Guide": {
+        "allOf": [
+          { "$ref": "#/components/schemas/ApiSuccessBase" },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "type": "object",
+                "properties": {
+                  "apirequests": { "type": "array" }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "ApiSuccess_Verify": {
+        "allOf": [
+          { "$ref": "#/components/schemas/ApiSuccessBase" },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "type": "object",
+                "properties": {
+                  "message": { "type": "string" }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "ApiSuccess_IdMessage": {
+        "allOf": [
+          { "$ref": "#/components/schemas/ApiSuccessBase" },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "type": "object",
+                "properties": {
+                  "id": { "type": "string" },
+                  "message": { "type": "string" }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "SendMessageBody": {
+        "type": "object",
+        "required": ["phone", "message"],
+        "properties": {
+          "phone": { "type": "string" },
+          "message": { "type": "string" },
+          "first_name": { "type": "string" },
+          "last_name": { "type": "string" },
+          "email": { "oneOf": [{ "type": "string", "format": "email" }, { "const": "" }] },
+          "header": { "type": "string" },
+          "footer": { "type": "string" },
+          "buttons": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["id", "title"],
+              "properties": {
+                "id": { "type": "string" },
+                "title": { "type": "string" }
+              }
+            }
+          }
+        }
+      },
+      "SendTemplateBody": {
+        "type": "object",
+        "required": ["phone", "template"],
+        "properties": {
+          "phone": { "type": "string" },
+          "first_name": { "type": "string" },
+          "last_name": { "type": "string" },
+          "email": { "oneOf": [{ "type": "string", "format": "email" }, { "const": "" }] },
+          "template": {
+            "type": "object",
+            "required": ["name", "language"],
+            "properties": {
+              "name": { "type": "string" },
+              "language": { "type": "object", "required": ["code"], "properties": { "code": { "type": "string" } } },
+              "components": { "type": "array", "items": {} }
+            }
+          }
+        }
+      },
+      "SendMediaBody": {
+        "type": "object",
+        "required": ["phone", "media_type", "media_url", "file_name"],
+        "properties": {
+          "phone": { "type": "string" },
+          "media_type": { "type": "string" },
+          "media_url": { "type": "string", "format": "uri" },
+          "caption": { "type": "string" },
+          "file_name": { "type": "string" },
+          "first_name": { "type": "string" },
+          "last_name": { "type": "string" },
+          "email": { "oneOf": [{ "type": "string", "format": "email" }, { "const": "" }] }
+        }
+      },
+      "ContactCreateBody": {
+        "type": "object",
+        "required": ["first_name", "phone"],
+        "properties": {
+          "first_name": { "type": "string" },
+          "last_name": { "type": "string" },
+          "phone": { "type": "string" },
+          "email": { "oneOf": [{ "type": "string", "format": "email" }, { "const": "" }] }
+        }
+      },
+      "BulkContactItem": {
+        "type": "object",
+        "required": ["first_name", "phone"],
+        "properties": {
+          "first_name": { "type": "string" },
+          "last_name": { "type": "string" },
+          "phone": { "type": "string" },
+          "email": { "oneOf": [{ "type": "string", "format": "email" }, { "const": "" }] },
+          "group": { "type": "array", "items": { "type": "string" } },
+          "street": { "type": "string" },
+          "city": { "type": "string" },
+          "state": { "type": "string" },
+          "zip": { "type": "string" },
+          "country": { "type": "string" }
+        }
+      },
+      "BulkContactsBody": {
+        "type": "object",
+        "required": ["contacts"],
+        "properties": {
+          "contacts": { "type": "array", "minItems": 1, "maxItems": 1000, "items": { "$ref": "#/components/schemas/BulkContactItem" } }
+        }
+      },
+      "AssignLabelsBody": {
+        "type": "object",
+        "required": ["contact_uuids", "tag_uuid"],
+        "properties": {
+          "contact_uuids": {
+            "oneOf": [
+              { "type": "string", "format": "uuid" },
+              { "type": "array", "minItems": 1, "items": { "type": "string", "format": "uuid" } }
+            ]
+          },
+          "tag_uuid": {
+            "oneOf": [
+              { "type": "string", "format": "uuid" },
+              { "type": "array", "minItems": 1, "items": { "type": "string", "format": "uuid" } }
+            ]
+          }
+        }
+      },
+      "ContactGroupNameBody": {
+        "type": "object",
+        "required": ["name"],
+        "properties": { "name": { "type": "string" } }
+      },
+      "BasicReplyBody": {
+        "type": "object",
+        "required": ["name", "trigger", "match_criteria", "response_type", "response"],
+        "properties": {
+          "name": { "type": "string" },
+          "trigger": { "type": "string" },
+          "match_criteria": { "type": "string", "enum": ["exact match", "contains"] },
+          "response_type": { "type": "string", "enum": ["text", "image", "audio"] },
+          "response": {
+            "oneOf": [
+              { "type": "string" },
+              { "type": "object", "required": ["media_id"], "properties": { "media_id": { "oneOf": [{ "type": "string" }, { "type": "number" }] } } }
+            ]
+          }
+        }
+      },
+      "LabelCreateBody": {
+        "type": "object",
+        "required": ["name", "color"],
+        "properties": {
+          "name": { "type": "string" },
+          "color": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" }
+        }
+      },
+      "LabelUpdateBody": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "color": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" }
+        }
+      },
+      "LabelBulkDeleteBody": {
+        "type": "object",
+        "required": ["tag_uuids"],
+        "properties": {
+          "tag_uuids": {
+            "oneOf": [
+              { "type": "string", "format": "uuid" },
+              { "type": "array", "minItems": 1, "items": { "type": "string", "format": "uuid" } }
+            ]
+          }
+        }
+      }
+    }
+  }
+}

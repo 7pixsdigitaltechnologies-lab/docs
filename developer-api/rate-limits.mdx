@@ -1,0 +1,38 @@
+---
+title: Rate limits
+description: Per-organization rate limiting on the Wapilot Developer API (Redis where configured).
+---
+
+## How limits work
+
+After successful API key authentication, requests are **rate-limited per organization** so limits are shared across all app instances (when **Redis** is available). Anonymous traffic uses a different keying strategy if the org context is missing.
+
+## Two buckets
+
+1. **General API** — applies to most `GET`/`POST`/`PUT`/`DELETE` routes under the Developer API.
+2. **Send / outbound** — a **stricter** limit applies to sending messages:
+   - `POST /send`
+   - `POST /send/template`
+   - `POST /send/media`
+
+## HTTP 429
+
+When a limit is exceeded, the API responds with **429 Too Many Requests** and a JSON body indicating too many requests for the organization. Retry after a short delay, ideally with **exponential backoff**.
+
+## Environment variables (defaults)
+
+These can be set on the server; defaults are typical **per-hour** windows (see your deployment’s `developerApiRateLimiter` config for exact behavior):
+
+| Variable | Role |
+|----------|------|
+| `DEVELOPER_API_RATE_LIMIT_WINDOW_MS` | Window for the general limit (default often 1 hour) |
+| `DEVELOPER_API_RATE_LIMIT_MAX` | Max requests per org per window for general API (e.g. `5000`) |
+| `DEVELOPER_API_SEND_RATE_LIMIT_WINDOW_MS` | Window for send endpoints |
+| `DEVELOPER_API_SEND_RATE_LIMIT_MAX` | Max send requests per org per window (e.g. `500`) |
+| `DEVELOPER_API_RATE_LIMIT_REDIS_DISABLED` | If `1`, falls back to in-memory limiting (not shared across instances) |
+
+Exact numbers depend on your server configuration; use **`429` response headers** (when exposed by the rate limiter) to tune client retry behavior.
+
+## Subscription and plan limits
+
+Some operations also enforce **plan** limits (for example contact or label creation). Those are separate from the HTTP rate limiter and return **403** with an explanatory `message` when a limit blocks the action.

@@ -1,11 +1,11 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
-  "name": "Mint Starter Kit",
+  "name": "Wapilot",
   "colors": {
-    "primary": "#16A34A",
-    "light": "#07C983",
-    "dark": "#15803D"
+    "primary": "#2563EB",
+    "light": "#3B82F6",
+    "dark": "#1D4ED8"
   },
   "favicon": "/favicon.svg",
   "navigation": {
@@ -14,109 +14,97 @@
         "tab": "Guides",
         "groups": [
           {
-            "group": "Getting started",
+            "group": "Developer API",
             "pages": [
               "index",
-              "quickstart",
-              "development"
-            ]
-          },
-          {
-            "group": "Customization",
-            "pages": [
-              "essentials/settings",
-              "essentials/navigation"
-            ]
-          },
-          {
-            "group": "Writing content",
-            "pages": [
-              "essentials/markdown",
-              "essentials/code",
-              "essentials/images",
-              "essentials/reusable-snippets"
-            ]
-          },
-          {
-            "group": "AI tools",
-            "pages": [
-              "ai-tools/cursor",
-              "ai-tools/claude-code",
-              "ai-tools/windsurf"
+              "developer-api/authentication",
+              "developer-api/rate-limits",
+              "developer-api/response-format"
             ]
           }
         ]
       },
       {
         "tab": "API reference",
+        "openapi": "api-reference/wapilot-developer-api.json",
         "groups": [
           {
-            "group": "API documentation",
+            "group": "Overview",
+            "pages": ["api-reference/introduction"]
+          },
+          {
+            "group": "Guide and verification",
+            "pages": ["GET /guide", "GET /verify"]
+          },
+          {
+            "group": "Messaging",
+            "pages": ["POST /send", "POST /send/template", "POST /send/media"]
+          },
+          {
+            "group": "Contacts",
             "pages": [
-              "api-reference/introduction"
+              "GET /contacts",
+              "POST /contacts",
+              "POST /contacts/bulk",
+              "GET /contacts/{uuid}/labels",
+              "POST /contacts/labels/assign",
+              "POST /contacts/labels/unassign",
+              "PUT /contacts/{uuid}",
+              "DELETE /contacts/{uuid}"
             ]
           },
           {
-            "group": "Endpoint examples",
+            "group": "Contact groups",
             "pages": [
-              "api-reference/endpoint/get",
-              "api-reference/endpoint/create",
-              "api-reference/endpoint/delete",
-              "api-reference/endpoint/webhook"
+              "GET /contact-groups",
+              "POST /contact-groups",
+              "PUT /contact-groups/{uuid}",
+              "DELETE /contact-groups/{uuid}"
+            ]
+          },
+          {
+            "group": "Basic replies",
+            "pages": [
+              "GET /basic-replies",
+              "POST /basic-replies",
+              "PUT /basic-replies/{uuid}",
+              "DELETE /basic-replies/{uuid}"
+            ]
+          },
+          {
+            "group": "Templates",
+            "pages": ["GET /templates", "GET /templates/{uuid}/payload"]
+          },
+          {
+            "group": "Chats",
+            "pages": ["GET /chats"]
+          },
+          {
+            "group": "Labels",
+            "pages": [
+              "GET /labels",
+              "POST /labels",
+              "GET /labels/{uuid}",
+              "PUT /labels/{uuid}",
+              "DELETE /labels/{uuid}",
+              "POST /labels/bulk-delete"
             ]
           }
         ]
       }
-    ],
-    "global": {
-      "anchors": [
-        {
-          "anchor": "Documentation",
-          "href": "https://mintlify.com/docs",
-          "icon": "book-open-cover"
-        },
-        {
-          "anchor": "Blog",
-          "href": "https://mintlify.com/blog",
-          "icon": "newspaper"
-        }
-      ]
-    }
+    ]
   },
   "logo": {
     "light": "/logo/light.svg",
     "dark": "/logo/dark.svg"
   },
   "navbar": {
-    "links": [
-      {
-        "label": "Support",
-        "href": "mailto:hi@mintlify.com"
-      }
-    ],
-    "primary": {
-      "type": "button",
-      "label": "Dashboard",
-      "href": "https://dashboard.mintlify.com"
-    }
+    "links": []
   },
   "contextual": {
-    "options": [
-     "copy",
-     "view",
-     "chatgpt",
-     "claude",
-     "perplexity",
-     "mcp",
-     "cursor",
-     "vscode"
-   ]
+    "options": ["copy", "view", "chatgpt", "claude", "perplexity", "mcp", "cursor", "vscode"]
   },
   "footer": {
-    "socials": {
-      "x": "https://x.com/mintlify",
-      "github": "https://github.com/mintlify",
-      "linkedin": "https://linkedin.com/company/mintlify"
-    }
+    "socials": {}
   }
 }

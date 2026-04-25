@@ -1,0 +1,37 @@
+---
+title: Authentication
+description: How to obtain and use a Wapilot organization API key for the Developer API.
+---
+
+## API key (Bearer)
+
+The Developer API uses **organization API keys**, not user session tokens.
+
+- Create and manage keys in the product **Developer Tools** (or equivalent) for your organization.
+- Send the key in the `Authorization` header:
+
+```http
+Authorization: Bearer YOUR_API_KEY
+```
+
+## JWT is rejected
+
+The API key middleware **detects user JWTs** and returns **401** with a message asking for an API key. Do not reuse the same Bearer token you use for logged-in app sessions.
+
+<Note title="Security">
+  If you need to call the Developer API from a browser, use CORS-aware flows only with keys you are comfortable exposing, or use a server-side proxy. Prefer server-to-server calls with the API key in a secure environment.
+</Note>
+
+## Verify your key
+
+Use **`GET /verify`** to confirm the key is valid, the subscription is active, and the plan includes API access. A **200** response includes a success envelope with a short confirmation message in `data`.
+
+Common failures:
+
+- **401** — Missing/invalid `Authorization: Bearer` value
+- **403** — Inactive subscription, no API access on the plan, or similar account restriction
+
+## Related
+
+- [Rate limits](/developer-api/rate-limits)
+- [Response format](/developer-api/response-format)
