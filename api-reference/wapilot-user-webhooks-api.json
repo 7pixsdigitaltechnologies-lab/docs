@@ -1,0 +1,333 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Wapilot User API — Webhooks",
+    "description": "Create and manage outbound webhook subscriptions for an organization. Requires a **user JWT** and `organization_id` query. Not the same as the Developer (API key) API under `/api/v1/api`.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://your-domain.com/api/v1",
+      "description": "Replace with your Wapilot API host."
+    }
+  ],
+  "security": [{ "bearerAuth": [] }],
+  "tags": [
+    { "name": "Webhooks", "description": "CRUD, list events, test delivery" }
+  ],
+  "paths": {
+    "/user/webhooks": {
+      "get": {
+        "tags": ["Webhooks"],
+        "summary": "List webhooks",
+        "operationId": "listUserWebhooks",
+        "parameters": [
+          { "$ref": "#/components/parameters/organizationId" },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": { "type": "integer", "minimum": 1, "default": 1 }
+          },
+          {
+            "name": "perPage",
+            "in": "query",
+            "description": "Page size (max 100)",
+            "schema": { "type": "integer", "minimum": 1, "maximum": 100, "default": 10 }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated list in data",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApiSuccess_Object" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      },
+      "post": {
+        "tags": ["Webhooks"],
+        "summary": "Create webhook",
+        "description": "Requires plan feature `webhook_enabled` when enabled in your deployment.",
+        "operationId": "createUserWebhook",
+        "parameters": [{ "$ref": "#/components/parameters/organizationId" }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CreateWebhookBody" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApiSuccess_Object" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "409": { "$ref": "#/components/responses/Conflict" }
+        }
+      }
+    },
+    "/user/webhooks/events": {
+      "get": {
+        "tags": ["Webhooks"],
+        "summary": "List available webhook event names",
+        "operationId": "getWebhookEventNames",
+        "parameters": [{ "$ref": "#/components/parameters/organizationId" }],
+        "responses": {
+          "200": {
+            "description": "`data.events` string array",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApiSuccess_Events" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/user/webhooks/test/{event}": {
+      "post": {
+        "tags": ["Webhooks"],
+        "summary": "Test webhook (sample POST to a URL)",
+        "description": "Sends a sample payload for `event` to the given `url` (10s client timeout; response details in `data`).",
+        "operationId": "testUserWebhook",
+        "parameters": [
+          { "$ref": "#/components/parameters/organizationId" },
+          {
+            "name": "event",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/TestWebhookBody" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Test result in data",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApiSuccess_Object" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/user/webhooks/{uuid}": {
+      "get": {
+        "tags": ["Webhooks"],
+        "summary": "Get webhook by UUID",
+        "operationId": "getUserWebhook",
+        "parameters": [
+          { "$ref": "#/components/parameters/organizationId" },
+          { "name": "uuid", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Single webhook in data",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ApiSuccess_Object" } } }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      },
+      "put": {
+        "tags": ["Webhooks"],
+        "summary": "Update webhook",
+        "operationId": "updateUserWebhook",
+        "parameters": [
+          { "$ref": "#/components/parameters/organizationId" },
+          { "name": "uuid", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/UpdateWebhookBody" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Updated", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ApiSuccess_Object" } } } },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      },
+      "delete": {
+        "tags": ["Webhooks"],
+        "summary": "Delete webhook",
+        "operationId": "deleteUserWebhook",
+        "parameters": [
+          { "$ref": "#/components/parameters/organizationId" },
+          { "name": "uuid", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Deleted; data may be null",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ApiSuccess_Object" } } }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "organizationId": {
+        "name": "organization_id",
+        "in": "query",
+        "required": true,
+        "description": "Target organization (must be one the user can access).",
+        "schema": { "type": "string" }
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "User session JWT from Wapilot auth, not the organization API key."
+      }
+    },
+    "responses": {
+      "BadRequest": {
+        "description": "Invalid input or missing organization_id",
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ApiErrorEnvelope" } } }
+      },
+      "Unauthorized": {
+        "description": "Missing or invalid JWT",
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ApiErrorEnvelope" } } }
+      },
+      "Forbidden": {
+        "description": "Plan does not allow webhooks",
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ApiErrorEnvelope" } } }
+      },
+      "NotFound": {
+        "description": "Webhook not found for org",
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ApiErrorEnvelope" } } }
+      },
+      "Conflict": {
+        "description": "URL already registered for this org",
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ApiErrorEnvelope" } } }
+      }
+    },
+    "schemas": {
+      "ApiErrorEnvelope": {
+        "type": "object",
+        "required": ["status", "success", "message", "data", "errors"],
+        "properties": {
+          "status": { "type": "integer" },
+          "success": { "const": false },
+          "message": { "type": "string" },
+          "data": { "type": "null" },
+          "errors": { "type": "array", "items": { "type": "object" } }
+        }
+      },
+      "ApiSuccessBase": {
+        "type": "object",
+        "required": ["status", "success", "message", "data", "errors"],
+        "properties": {
+          "status": { "type": "integer" },
+          "success": { "const": true },
+          "message": { "type": "string" },
+          "data": {},
+          "errors": { "type": "array" }
+        }
+      },
+      "ApiSuccess_Object": {
+        "allOf": [
+          { "$ref": "#/components/schemas/ApiSuccessBase" },
+          { "type": "object", "properties": { "data": { "type": "object", "additionalProperties": true } } }
+        ]
+      },
+      "ApiSuccess_Events": {
+        "allOf": [
+          { "$ref": "#/components/schemas/ApiSuccessBase" },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "type": "object",
+                "required": ["events"],
+                "properties": {
+                  "events": {
+                    "type": "array",
+                    "items": { "type": "string" }
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "WebhookEventName": {
+        "type": "string",
+        "enum": [
+          "message.received",
+          "message.sent",
+          "message.status.update",
+          "contact.created",
+          "contact.updated",
+          "contact.deleted",
+          "audince.created",
+          "audince.updated",
+          "audince.deleted",
+          "autoreply.created",
+          "autoreply.updated",
+          "autoreply.deleted",
+          "label.created",
+          "label.updated",
+          "label.deleted"
+        ]
+      },
+      "CreateWebhookBody": {
+        "type": "object",
+        "required": ["url", "events"],
+        "properties": {
+          "url": { "type": "string", "format": "uri" },
+          "events": { "type": "array", "minItems": 1, "items": { "$ref": "#/components/schemas/WebhookEventName" } }
+        }
+      },
+      "UpdateWebhookBody": {
+        "type": "object",
+        "properties": {
+          "url": { "type": "string", "format": "uri" },
+          "events": { "type": "array", "minItems": 1, "items": { "$ref": "#/components/schemas/WebhookEventName" } }
+        }
+      },
+      "TestWebhookBody": {
+        "type": "object",
+        "required": ["url"],
+        "properties": {
+          "url": { "type": "string", "format": "uri" }
+        }
+      }
+    }
+  }
+}

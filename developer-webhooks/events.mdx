@@ -1,0 +1,291 @@
+---
+title: Event reference
+description: Webhook event names and example data payloads for Wapilot outbound webhooks.
+---
+
+## Event names
+
+The following `event` strings are valid when subscribing. The spelling `audince.*` matches the product code.
+
+| `event` | When it fires (high level) |
+|---------|----------------------------|
+| `message.received` | Inbound WhatsApp message received |
+| `message.sent` | Outbound message send completed (Meta response shape in `data`) |
+| `message.status.update` | Message delivery/read status update |
+| `contact.created` | Contact created |
+| `contact.updated` | Contact updated |
+| `contact.deleted` | Contact deleted |
+| `audince.created` | Contact group (audience) created |
+| `audince.updated` | Contact group updated |
+| `audince.deleted` | Contact group deleted |
+| `autoreply.created` | Basic (canned) reply created |
+| `autoreply.updated` | Basic reply updated |
+| `autoreply.deleted` | Basic reply deleted |
+| `label.created` | Label created |
+| `label.updated` | Label updated |
+| `label.deleted` | Label deleted |
+
+<Note>
+  All JSON examples below use **redacted placeholders** (`xxxx`, masked IDs, and generic timestamps). Real payloads contain your customers’ data—handle them accordingly under your privacy policy.
+</Note>
+
+## Example payloads
+
+These mirror the structure produced for testing in the product; **live** `data` may include more or fewer fields over time. Branch on `event` and ignore unknown keys.
+
+### message.received
+
+```json
+{
+  "event": "message.received",
+  "data": {
+    "value": {
+      "messaging_product": "whatsapp",
+      "metadata": {
+        "display_phone_number": "xxxxxxxxxxxx",
+        "phone_number_id": "xxxxxxxxxxxxxxxx"
+      },
+      "contacts": [
+        {
+          "profile": { "name": "xxxx" },
+          "wa_id": "+xxxxxxxxxxxx"
+        }
+      ],
+      "messages": [
+        {
+          "from": "+xxxxxxxxxxxx",
+          "id": "wamid.xxxx",
+          "timestamp": "1700000000",
+          "text": { "body": "xxxx" },
+          "type": "text"
+        }
+      ]
+    },
+    "field": "messages"
+  }
+}
+```
+
+### message.sent
+
+```json
+{
+  "event": "message.sent",
+  "data": {
+    "success": true,
+    "data": {
+      "messaging_product": "whatsapp",
+      "contacts": [{ "input": "+xxxxxxxxxxxx", "wa_id": "+xxxxxxxxxxxx" }],
+      "messages": [{ "id": "wamid.xxxx", "message_status": "accepted" }]
+    }
+  }
+}
+```
+
+### message.status.update
+
+```json
+{
+  "event": "message.status.update",
+  "data": {
+    "value": {
+      "messaging_product": "whatsapp",
+      "metadata": {
+        "display_phone_number": "+xxxxxxxxxxxx",
+        "phone_number_id": "xxxxxxxxxxxxxxxx"
+      },
+      "statuses": [
+        {
+          "id": "wamid.xxxx",
+          "status": "delivered",
+          "timestamp": "1700000000",
+          "recipient_id": "xxxxxxxxxxxx"
+        }
+      ]
+    },
+    "field": "messages"
+  }
+}
+```
+
+### contact.created
+
+```json
+{
+  "event": "contact.created",
+  "data": {
+    "first_name": "xxxx",
+    "last_name": "xxxx",
+    "email": null,
+    "phone": "+xxxxxxxxxxxx",
+    "created_at": "2025-01-01T12:00:00.000Z",
+    "uuid": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "id": 0,
+    "full_name": "xxxx",
+    "formatted_phone_number": "+x (xxx) xxx-xxxx"
+  }
+}
+```
+
+### contact.updated
+
+```json
+{
+  "event": "contact.updated",
+  "data": {
+    "id": 0,
+    "uuid": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "first_name": "xxxx",
+    "last_name": "xxxx",
+    "phone": "+xxxxxxxxxxxx",
+    "updated_at": "2025-01-01T12:00:00.000Z",
+    "full_name": "xxxx",
+    "formatted_phone_number": "+x (xxx) xxx-xxxx"
+  }
+}
+```
+
+### contact.deleted
+
+```json
+{
+  "event": "contact.deleted",
+  "data": {
+    "id": 0,
+    "uuid": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "deleted_at": "2025-01-01T12:00:00.000Z"
+  }
+}
+```
+
+### audince.created
+
+```json
+{
+  "event": "audince.created",
+  "data": {
+    "name": "xxxx",
+    "uuid": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "created_at": "2025-01-01T12:00:00.000Z",
+    "updated_at": "2025-01-01T12:00:00.000Z"
+  }
+}
+```
+
+### audince.updated
+
+```json
+{
+  "event": "audince.updated",
+  "data": {
+    "uuid": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "name": "xxxx",
+    "updated_at": "2025-01-01T12:00:00.000Z"
+  }
+}
+```
+
+### audince.deleted
+
+```json
+{
+  "event": "audince.deleted",
+  "data": {
+    "uuid": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "deleted_at": "2025-01-01T12:00:00.000Z"
+  }
+}
+```
+
+### autoreply.created
+
+`metadata` is often a **string** containing JSON (text/image configuration). Inner text is redacted below.
+
+```json
+{
+  "event": "autoreply.created",
+  "data": {
+    "name": "xxxx",
+    "trigger": "xxxx",
+    "match_criteria": "contains",
+    "metadata": "{\"type\":\"text\",\"data\":{\"text\":\"xxxx\"}}",
+    "uuid": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "created_at": "2025-01-01T12:00:00.000Z",
+    "updated_at": "2025-01-01T12:00:00.000Z"
+  }
+}
+```
+
+### autoreply.updated
+
+```json
+{
+  "event": "autoreply.updated",
+  "data": {
+    "uuid": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "name": "xxxx",
+    "trigger": "xxxx",
+    "match_criteria": "contains",
+    "metadata": "{\"type\":\"text\",\"data\":{\"text\":\"xxxx\"}}",
+    "updated_at": "2025-01-01T12:00:00.000Z"
+  }
+}
+```
+
+### autoreply.deleted
+
+```json
+{
+  "event": "autoreply.deleted",
+  "data": {
+    "list": [
+      {
+        "uuid": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+        "deleted_at": "2025-01-01T12:00:00.000Z"
+      }
+    ]
+  }
+}
+```
+
+### label.created
+
+```json
+{
+  "event": "label.created",
+  "data": {
+    "uuid": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "name": "xxxx",
+    "color": "#xxxxxx",
+    "created_at": "2025-01-01T12:00:00.000Z",
+    "updated_at": "2025-01-01T12:00:00.000Z"
+  }
+}
+```
+
+### label.updated
+
+```json
+{
+  "event": "label.updated",
+  "data": {
+    "uuid": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "name": "xxxx",
+    "color": "#xxxxxx",
+    "updated_at": "2025-01-01T12:00:00.000Z"
+  }
+}
+```
+
+### label.deleted
+
+```json
+{
+  "event": "label.deleted",
+  "data": {
+    "uuid": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "name": "xxxx",
+    "color": "#xxxxxx"
+  }
+}
+```

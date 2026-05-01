@@ -1,0 +1,34 @@
+---
+title: contact.updated
+description: Fired when a contact's details are updated.
+---
+
+## When it fires
+
+This event fires when a contact record is edited — name, email, phone, or other fields.
+
+## Payload
+
+```json
+{
+  "event": "contact.updated",
+  "data": {
+    "id": 0,
+    "uuid": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "first_name": "xxxx",
+    "last_name": "xxxx",
+    "phone": "+xxxxxxxxxxxx",
+    "updated_at": "2025-01-01T12:00:00.000Z",
+    "full_name": "xxxx",
+    "formatted_phone_number": "+x (xxx) xxx-xxxx"
+  }
+}
+```
+
+## Key fields
+
+| Field | Description |
+|-------|-------------|
+| `data.uuid` | Contact UUID |
+| `data.phone` | Updated E.164 phone number |
+| `data.updated_at` | ISO 8601 timestamp of the update |

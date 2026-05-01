@@ -1,0 +1,52 @@
+---
+title: message.received
+description: Fired when an inbound WhatsApp message arrives for your organization.
+---
+
+## When it fires
+
+Wapilot triggers this event whenever a new inbound WhatsApp message is received from a contact and processed by the system.
+
+## Payload
+
+```json
+{
+  "event": "message.received",
+  "data": {
+    "value": {
+      "messaging_product": "whatsapp",
+      "metadata": {
+        "display_phone_number": "xxxxxxxxxxxx",
+        "phone_number_id": "xxxxxxxxxxxxxxxx"
+      },
+      "contacts": [
+        {
+          "profile": { "name": "xxxx" },
+          "wa_id": "+xxxxxxxxxxxx"
+        }
+      ],
+      "messages": [
+        {
+          "from": "+xxxxxxxxxxxx",
+          "id": "wamid.xxxx",
+          "timestamp": "1700000000",
+          "text": { "body": "xxxx" },
+          "type": "text"
+        }
+      ]
+    },
+    "field": "messages"
+  }
+}
+```
+
+## Key fields
+
+| Field | Description |
+|-------|-------------|
+| `data.value.metadata.phone_number_id` | Your WhatsApp phone number ID |
+| `data.value.contacts[].wa_id` | Sender's WhatsApp ID (phone number) |
+| `data.value.messages[].id` | WhatsApp message ID (`wamid.*`) |
+| `data.value.messages[].type` | Message type: `text`, `image`, `audio`, etc. |
+| `data.value.messages[].timestamp` | Unix timestamp of the message |
+| `data.field` | Always `"messages"` for this event |

@@ -1,0 +1,37 @@
+---
+title: message.sent
+description: Fired when Wapilot successfully submits an outbound message to WhatsApp.
+---
+
+## When it fires
+
+This event fires after an outbound message is sent via the Developer API or from the inbox. The `data` object reflects the response received from Meta's API.
+
+## Payload
+
+```json
+{
+  "event": "message.sent",
+  "data": {
+    "success": true,
+    "data": {
+      "messaging_product": "whatsapp",
+      "contacts": [
+        { "input": "+xxxxxxxxxxxx", "wa_id": "+xxxxxxxxxxxx" }
+      ],
+      "messages": [
+        { "id": "wamid.xxxx", "message_status": "accepted" }
+      ]
+    }
+  }
+}
+```
+
+## Key fields
+
+| Field | Description |
+|-------|-------------|
+| `data.success` | `true` if Meta accepted the message |
+| `data.data.contacts[].wa_id` | Recipient's WhatsApp ID |
+| `data.data.messages[].id` | WhatsApp message ID (`wamid.*`) |
+| `data.data.messages[].message_status` | Typically `"accepted"` at send time |

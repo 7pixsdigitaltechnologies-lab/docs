@@ -1,0 +1,39 @@
+---
+title: autoreply.created
+description: Fired when a new basic (canned) reply is created.
+---
+
+## When it fires
+
+This event fires when a basic reply rule is added to your organization.
+
+## Payload
+
+```json
+{
+  "event": "autoreply.created",
+  "data": {
+    "name": "xxxx",
+    "trigger": "xxxx",
+    "match_criteria": "contains",
+    "metadata": "{\"type\":\"text\",\"data\":{\"text\":\"xxxx\"}}",
+    "uuid": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "created_at": "2025-01-01T12:00:00.000Z",
+    "updated_at": "2025-01-01T12:00:00.000Z"
+  }
+}
+```
+
+## Key fields
+
+| Field | Description |
+|-------|-------------|
+| `data.uuid` | Auto-reply rule UUID |
+| `data.trigger` | The keyword or phrase that triggers this reply |
+| `data.match_criteria` | `"exact match"` or `"contains"` |
+| `data.metadata` | JSON string — contains `type` (`text`, `image`, `audio`) and response content |
+| `data.created_at` | ISO 8601 creation timestamp |
+
+<Note>
+  `metadata` is a **JSON-encoded string**, not a nested object. Parse it with `JSON.parse()` in your handler.
+</Note>

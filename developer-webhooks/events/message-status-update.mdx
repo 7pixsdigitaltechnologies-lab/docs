@@ -1,0 +1,43 @@
+---
+title: message.status.update
+description: Fired when a delivery or read status update is received for an outbound message.
+---
+
+## When it fires
+
+WhatsApp reports message delivery milestones back to Wapilot (sent → delivered → read). This event fires each time a status update arrives.
+
+## Payload
+
+```json
+{
+  "event": "message.status.update",
+  "data": {
+    "value": {
+      "messaging_product": "whatsapp",
+      "metadata": {
+        "display_phone_number": "+xxxxxxxxxxxx",
+        "phone_number_id": "xxxxxxxxxxxxxxxx"
+      },
+      "statuses": [
+        {
+          "id": "wamid.xxxx",
+          "status": "delivered",
+          "timestamp": "1700000000",
+          "recipient_id": "xxxxxxxxxxxx"
+        }
+      ]
+    },
+    "field": "messages"
+  }
+}
+```
+
+## Key fields
+
+| Field | Description |
+|-------|-------------|
+| `data.value.statuses[].id` | WhatsApp message ID (`wamid.*`) |
+| `data.value.statuses[].status` | One of: `sent`, `delivered`, `read`, `failed` |
+| `data.value.statuses[].timestamp` | Unix timestamp of the status update |
+| `data.value.statuses[].recipient_id` | Recipient's phone number |

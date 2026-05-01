@@ -1,0 +1,31 @@
+---
+title: label.updated
+description: Fired when a label (contact tag) is updated.
+---
+
+## When it fires
+
+This event fires when a label's name or color is changed.
+
+## Payload
+
+```json
+{
+  "event": "label.updated",
+  "data": {
+    "uuid": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "name": "xxxx",
+    "color": "#xxxxxx",
+    "updated_at": "2025-01-01T12:00:00.000Z"
+  }
+}
+```
+
+## Key fields
+
+| Field | Description |
+|-------|-------------|
+| `data.uuid` | Label UUID |
+| `data.name` | Updated label name |
+| `data.color` | Updated hex color |
+| `data.updated_at` | ISO 8601 update timestamp |

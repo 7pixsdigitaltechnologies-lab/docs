@@ -1,0 +1,27 @@
+---
+title: audince.deleted
+description: Fired when a contact group (audience) is deleted.
+---
+
+## When it fires
+
+This event fires when a contact group is permanently removed from your organization.
+
+## Payload
+
+```json
+{
+  "event": "audince.deleted",
+  "data": {
+    "uuid": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "deleted_at": "2025-01-01T12:00:00.000Z"
+  }
+}
+```
+
+## Key fields
+
+| Field | Description |
+|-------|-------------|
+| `data.uuid` | UUID of the deleted group |
+| `data.deleted_at` | ISO 8601 deletion timestamp |

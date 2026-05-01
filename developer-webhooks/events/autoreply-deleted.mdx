@@ -1,0 +1,32 @@
+---
+title: autoreply.deleted
+description: Fired when one or more basic (canned) replies are deleted.
+---
+
+## When it fires
+
+This event fires when basic reply rule(s) are removed from your organization. The `data.list` array may contain multiple entries if rules were bulk-deleted.
+
+## Payload
+
+```json
+{
+  "event": "autoreply.deleted",
+  "data": {
+    "list": [
+      {
+        "uuid": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+        "deleted_at": "2025-01-01T12:00:00.000Z"
+      }
+    ]
+  }
+}
+```
+
+## Key fields
+
+| Field | Description |
+|-------|-------------|
+| `data.list` | Array of deleted rules |
+| `data.list[].uuid` | UUID of the deleted rule |
+| `data.list[].deleted_at` | ISO 8601 deletion timestamp |

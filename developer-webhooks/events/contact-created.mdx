@@ -1,0 +1,36 @@
+---
+title: contact.created
+description: Fired when a new contact is created in your organization.
+---
+
+## When it fires
+
+This event fires when a contact is added to your organization — via the API, the inbox, or an import.
+
+## Payload
+
+```json
+{
+  "event": "contact.created",
+  "data": {
+    "first_name": "xxxx",
+    "last_name": "xxxx",
+    "email": null,
+    "phone": "+xxxxxxxxxxxx",
+    "created_at": "2025-01-01T12:00:00.000Z",
+    "uuid": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "id": 0,
+    "full_name": "xxxx",
+    "formatted_phone_number": "+x (xxx) xxx-xxxx"
+  }
+}
+```
+
+## Key fields
+
+| Field | Description |
+|-------|-------------|
+| `data.uuid` | Contact UUID — use this as the stable identifier in your system |
+| `data.phone` | E.164 phone number |
+| `data.formatted_phone_number` | Human-readable phone number |
+| `data.created_at` | ISO 8601 timestamp |

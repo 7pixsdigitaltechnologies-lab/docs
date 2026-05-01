@@ -21,6 +21,12 @@
               "developer-api/rate-limits",
               "developer-api/response-format"
             ]
+          },
+          {
+            "group": "Developer webhooks",
+            "pages": [
+              "developer-webhooks/overview"
+            ]
           }
         ]
       },
@@ -34,14 +40,17 @@
           },
           {
             "group": "Guide and verification",
+            "expanded": false,
             "pages": ["GET /guide", "GET /verify"]
           },
           {
             "group": "Messaging",
+            "expanded": false,
             "pages": ["POST /send", "POST /send/template", "POST /send/media"]
           },
           {
             "group": "Contacts",
+            "expanded": false,
             "pages": [
               "GET /contacts",
               "POST /contacts",
@@ -55,6 +64,7 @@
           },
           {
             "group": "Contact groups",
+            "expanded": false,
             "pages": [
               "GET /contact-groups",
               "POST /contact-groups",
@@ -64,6 +74,7 @@
           },
           {
             "group": "Basic replies",
+            "expanded": false,
             "pages": [
               "GET /basic-replies",
               "POST /basic-replies",
@@ -73,14 +84,17 @@
           },
           {
             "group": "Templates",
+            "expanded": false,
             "pages": ["GET /templates", "GET /templates/{uuid}/payload"]
           },
           {
             "group": "Chats",
+            "expanded": false,
             "pages": ["GET /chats"]
           },
           {
             "group": "Labels",
+            "expanded": false,
             "pages": [
               "GET /labels",
               "POST /labels",
@@ -88,6 +102,62 @@
               "PUT /labels/{uuid}",
               "DELETE /labels/{uuid}",
               "POST /labels/bulk-delete"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Webhooks",
+        "groups": [
+          {
+            "group": "Overview",
+            "pages": [
+              "developer-webhooks/payloads"
+            ]
+          },
+          {
+            "group": "Messages",
+            "expanded": false,
+            "pages": [
+              "developer-webhooks/events/message-received",
+              "developer-webhooks/events/message-sent",
+              "developer-webhooks/events/message-status-update"
+            ]
+          },
+          {
+            "group": "Contacts",
+            "expanded": false,
+            "pages": [
+              "developer-webhooks/events/contact-created",
+              "developer-webhooks/events/contact-updated",
+              "developer-webhooks/events/contact-deleted"
+            ]
+          },
+          {
+            "group": "Audiences",
+            "expanded": false,
+            "pages": [
+              "developer-webhooks/events/audience-created",
+              "developer-webhooks/events/audience-updated",
+              "developer-webhooks/events/audience-deleted"
+            ]
+          },
+          {
+            "group": "Basic replies",
+            "expanded": false,
+            "pages": [
+              "developer-webhooks/events/autoreply-created",
+              "developer-webhooks/events/autoreply-updated",
+              "developer-webhooks/events/autoreply-deleted"
+            ]
+          },
+          {
+            "group": "Labels",
+            "expanded": false,
+            "pages": [
+              "developer-webhooks/events/label-created",
+              "developer-webhooks/events/label-updated",
+              "developer-webhooks/events/label-deleted"
             ]
           }
         ]

@@ -1,0 +1,31 @@
+---
+title: User webhooks management API
+description: Register and test webhook URLs using the Wapilot user (JWT) API.
+---
+
+## Who this is for
+
+Managing webhook **subscriptions** (the list of `url` + `events[]` per organization) is done with the **User API**, not the [Developer API](/developer-api/authentication) (API key) routes.
+
+- **Authentication:** `Authorization: Bearer` with a **user JWT** (same as the web app after login)
+- **Organization:** every request must include a query parameter **`organization_id`** with the org you are acting on, and the user must have access to that org
+- **Base path:** requests go to `/api/v1` — see the **User API (webhooks)** tab in the API reference for full paths and bodies
+
+## Plan requirement
+
+**Creating** a webhook registration (`POST /user/webhooks`) requires the subscription plan to have **webhooks enabled** (`webhook_enabled`). Other operations may be allowed without that gate depending on server rules; if create fails with a forbidden error, check your plan.
+
+## Operations
+
+- **List** webhooks and **paginate** (`page`, `perPage`)
+- **List event names** you can subscribe to (`/user/webhooks/events`)
+- **Get, create, update, delete** a subscription by `uuid`
+- **Send a test** `POST` to an arbitrary `url` with a sample payload for a given **event** name (`/user/webhooks/test/{event}`)
+
+## Relationship to inbound POSTs
+
+The management API does not receive the WhatsApp traffic itself — it only configures which **your** public HTTPS URL(s) Wapilot will `POST` to. See [Webhooks overview](/developer-webhooks/overview) and [Payload format](/developer-webhooks/payloads) for the outbound delivery format.
+
+## Next
+
+Open the [User webhooks API reference](/api-reference/user-webhooks-introduction) for endpoint details and the interactive playground (use your real host and JWT when testing).

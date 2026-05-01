@@ -1,0 +1,40 @@
+---
+title: Payload format
+description: Delivery behavior and JSON envelope for every Wapilot outbound webhook.
+---
+
+## How delivery works
+
+- **Method:** `POST`
+- **Headers:** `Content-Type: application/json`, `User-Agent: WAPilot-Webhook/1.0`
+- **Timeout:** ~5 seconds — your endpoint must accept the connection and body within this window
+- **Retries:** none — delivery is best-effort; failures are logged and do not roll back the triggering action
+- **Security:** there is no built-in HMAC or signature header. Use **HTTPS** and restrict your endpoint URL as needed.
+
+## Envelope
+
+Every delivery shares the same top-level structure:
+
+```json
+{
+  "event": "<event-name>",
+  "data": { }
+}
+```
+
+| Field   | Type   | Description |
+|---------|--------|-------------|
+| `event` | string | The event name (e.g. `message.received`, `contact.created`) |
+| `data`  | object | Event-specific payload — shape varies per event |
+
+Always key off `event` first, then parse `data` according to the specific event page.
+
+## Field notes
+
+- **Unknown fields:** tolerate extra fields in `data` — payloads may evolve.
+- **Large IDs:** some `id` fields are database integers serialized as JSON numbers. Parse defensively (e.g. as strings) if your language has integer size limits.
+- **Redacted examples:** all example payloads in this documentation use `xxxx`-style placeholders in place of real names, phone numbers, and IDs.
+
+## Registering your URL
+
+Configure which URLs receive which events from your organization's **Developer Tools** in the app, or via the user webhooks management API (JWT-authenticated).

@@ -1,0 +1,23 @@
+---
+title: Developer webhooks
+description: Receive real-time event notifications from Wapilot to your HTTPS endpoint.
+---
+
+Wapilot can **POST JSON** to a URL you configure whenever something happens in your organization — a new message, a contact change, a label update, and more.
+
+<CardGroup cols={2}>
+  <Card title="Payload format" icon="brackets-curly" href="/developer-webhooks/payloads">
+    Envelope structure, delivery behavior, and how to handle events safely.
+  </Card>
+  <Card title="message.received" icon="message" href="/developer-webhooks/events/message-received">
+    Fired when an inbound WhatsApp message arrives.
+  </Card>
+  <Card title="contact.created" icon="user-plus" href="/developer-webhooks/events/contact-created">
+    Fired when a contact is created in your organization.
+  </Card>
+  <Card title="label.created" icon="tag" href="/developer-webhooks/events/label-created">
+    Fired when a label is created.
+  </Card>
+</CardGroup>
+
+Browse the full event catalog in the **Webhooks** tab on the top navigation bar.

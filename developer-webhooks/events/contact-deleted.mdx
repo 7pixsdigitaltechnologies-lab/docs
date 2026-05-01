@@ -1,0 +1,32 @@
+---
+title: contact.deleted
+description: Fired when a contact is deleted from your organization.
+---
+
+## When it fires
+
+This event fires when a contact is permanently removed.
+
+## Payload
+
+```json
+{
+  "event": "contact.deleted",
+  "data": {
+    "id": 0,
+    "uuid": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "deleted_at": "2025-01-01T12:00:00.000Z"
+  }
+}
+```
+
+## Key fields
+
+| Field | Description |
+|-------|-------------|
+| `data.uuid` | UUID of the deleted contact |
+| `data.deleted_at` | ISO 8601 deletion timestamp |
+
+<Note>
+  After receiving this event, any reference you hold to this contact's `uuid` will no longer resolve to a live record.
+</Note>

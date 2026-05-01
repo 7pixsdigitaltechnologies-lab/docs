@@ -1,0 +1,30 @@
+---
+title: audince.created
+description: Fired when a new contact group (audience) is created.
+---
+
+## When it fires
+
+This event fires when a contact group is created in your organization. The event name is `audince.created` — note the spelling matches the product code exactly.
+
+## Payload
+
+```json
+{
+  "event": "audince.created",
+  "data": {
+    "name": "xxxx",
+    "uuid": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "created_at": "2025-01-01T12:00:00.000Z",
+    "updated_at": "2025-01-01T12:00:00.000Z"
+  }
+}
+```
+
+## Key fields
+
+| Field | Description |
+|-------|-------------|
+| `data.uuid` | Group UUID |
+| `data.name` | Display name of the group |
+| `data.created_at` | ISO 8601 creation timestamp |

@@ -1,0 +1,33 @@
+---
+title: label.deleted
+description: Fired when a label (contact tag) is deleted.
+---
+
+## When it fires
+
+This event fires when a label is permanently removed from your organization.
+
+## Payload
+
+```json
+{
+  "event": "label.deleted",
+  "data": {
+    "uuid": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "name": "xxxx",
+    "color": "#xxxxxx"
+  }
+}
+```
+
+## Key fields
+
+| Field | Description |
+|-------|-------------|
+| `data.uuid` | UUID of the deleted label |
+| `data.name` | Name of the deleted label |
+| `data.color` | Color of the deleted label |
+
+<Note>
+  Unlike other delete events, this payload does not include a `deleted_at` timestamp.
+</Note>

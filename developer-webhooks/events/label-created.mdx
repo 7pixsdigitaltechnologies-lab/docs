@@ -1,0 +1,32 @@
+---
+title: label.created
+description: Fired when a new label (contact tag) is created.
+---
+
+## When it fires
+
+This event fires when a label is added to your organization.
+
+## Payload
+
+```json
+{
+  "event": "label.created",
+  "data": {
+    "uuid": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "name": "xxxx",
+    "color": "#xxxxxx",
+    "created_at": "2025-01-01T12:00:00.000Z",
+    "updated_at": "2025-01-01T12:00:00.000Z"
+  }
+}
+```
+
+## Key fields
+
+| Field | Description |
+|-------|-------------|
+| `data.uuid` | Label UUID |
+| `data.name` | Display name of the label |
+| `data.color` | Hex color code (e.g. `#FF5733`) |
+| `data.created_at` | ISO 8601 creation timestamp |

@@ -1,0 +1,37 @@
+---
+title: User webhooks API overview
+description: Base URL, JWT auth, organization scoping, and how this tab is organized.
+---
+
+## What’s in this tab
+
+Use the sidebar in order:
+
+1. **Overview** — this page and how to [manage webhook subscriptions](/developer-webhooks/management-api) (JWT, `organization_id`, plans).
+2. **Inbound webhook payloads** — what Wapilot **POSTs to your URL**: [overview](/developer-webhooks/overview), [envelope](/developer-webhooks/payloads), and the full **[event reference](/developer-webhooks/events)** (`message.received`, `contact.created`, …).
+3. **Manage subscriptions (REST)** — OpenAPI reference for `GET/POST/PUT/DELETE /user/webhooks` (register URLs, list event names from the API, send a test POST).
+
+## Base URL
+
+These routes live under:
+
+`{BASE_URL}/api/v1`
+
+where `BASE_URL` is your Wapilot backend. Paths in this spec are like `/user/webhooks` (the server URL in OpenAPI is already `/api/v1`).
+
+## Authentication
+
+- **`Authorization: Bearer`:** pass a **user JWT** (from Wapilot login), **not** the organization [API key](/developer-api/authentication) used for `/api/v1/api/...`
+- **Query:** every call must include **`organization_id`**, and your user must be allowed to act on that organization
+
+<Note>
+  The [Developer API](/api-reference/introduction) tab documents **API key** routes under `/api/v1/api`. This tab is only for **JWT** + **user webhooks** management.
+</Note>
+
+## Not Meta webhooks
+
+This documentation is **not** for the Meta (Facebook) WhatsApp callback URL. It is for **(1)** the REST API that registers your outbound webhook URLs, and **(2)** the shape of the POST Wapilot sends to **your** server — see [Webhooks overview](/developer-webhooks/overview).
+
+## Test endpoint and event names
+
+`POST /user/webhooks/test/{event}` uses a **path** segment for the event (e.g. `message.received`). Encode the path or use a client that allows dots in the segment. Valid names match [Event reference](/developer-webhooks/events).
